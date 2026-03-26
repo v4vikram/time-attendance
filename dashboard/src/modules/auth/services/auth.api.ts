@@ -16,5 +16,11 @@ export const registerApi = async (data: any) => {
 };
 
 export const getMeApi = async (): Promise<{ user: User }> => {
-  return apiClient.get('/auth/me');
+  const res = await apiClient.get('/auth/me');
+  console.log("res", res);
+  return res.data.user;
+};
+
+export const logoutApi = async () => {
+  return apiClient.get('/auth/logout');
 };

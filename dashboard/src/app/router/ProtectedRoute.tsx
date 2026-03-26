@@ -1,19 +1,22 @@
+import { useAuth } from "@/modules/auth/hooks/useAuth";
+import Loader from "@/shared/components/Loader";
 import { Navigate, Outlet } from "react-router-dom";
+
 
 type Props = {
   allowedRoles?: string[];
 };
 
 export const ProtectedRoute = ({ allowedRoles }: Props) => {
-//   const { user } = useAuth();
-const user = true
+  const { user, isLoading } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+
+  if (isLoading) {
+    return <Loader />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/unauthorized" replace />;
+  if (!user) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Users, CheckCircle, Calendar, UserPlus, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-export const StatCards: React.FC = () => {
+export const StatCards = () => {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
       <Card className="shadow-sm">

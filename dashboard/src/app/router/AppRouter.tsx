@@ -3,12 +3,12 @@ import { Routes, Route } from "react-router-dom";
 import { routes } from "./routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import DashboardLayout from "@/shared/layouts/DashboardLayout";
-import { LoginPage } from "@/modules/auth/pages/LoginPage";
+import AuthPage from "@/modules/auth/pages/AuthPage";
 
 export const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<AuthPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
 

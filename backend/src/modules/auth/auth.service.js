@@ -16,8 +16,11 @@ export const registerUser = async (userData) => {
   return { user: userResponse };
 };
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (body, res) => {
+  const { email, password } = body;
+
   const user = await User.findOne({ email }).select('+password');
+
   if (!user || !(await user.comparePassword(password))) {
     throw new ApiError(401, 'Invalid email or password');
   }
@@ -27,7 +30,15 @@ export const loginUser = async (email, password) => {
   const userResponse = user.toObject();
   delete userResponse.password;
 
-  return { user: userResponse, token };
+  // 🍪 Only set cookie here (NO response)
+  res.cookie('accessToken', token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
+
+  return userResponse;
 };
 
 export const getCurrentUser = async (userId) => {
@@ -36,4 +47,9 @@ export const getCurrentUser = async (userId) => {
     throw new ApiError(404, 'User not found');
   }
   return { user };
+};
+
+export const logoutUser = async (res) => {
+  res.clearCookie('accessToken');
+  return { message: 'User logged out successfully' };
 };

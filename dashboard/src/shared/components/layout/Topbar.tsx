@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useAuth } from '@/modules/auth/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface TopbarProps {
   searchValue: string;
@@ -19,6 +21,14 @@ interface TopbarProps {
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ searchValue, setSearchValue }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout();
+    navigate("/")
+  };
+
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 shrink-0">
       <div className="w-[300px] flex items-center gap-2">
@@ -52,8 +62,8 @@ export const Topbar: React.FC<TopbarProps> = ({ searchValue, setSearchValue }) =
                 <AvatarFallback>EP</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="font-medium text-[13px] leading-tight group-hover:text-primary transition-colors">Eleanor Pena</span>
-                <span className="text-[11px] text-muted-foreground">HR Manager</span>
+                <span className="font-medium text-[13px] leading-tight group-hover:text-primary transition-colors">{user?.name}</span>
+                <span className="text-[11px] text-muted-foreground">{user?.role}</span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
@@ -64,7 +74,7 @@ export const Topbar: React.FC<TopbarProps> = ({ searchValue, setSearchValue }) =
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout} >Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

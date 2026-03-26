@@ -99,7 +99,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({
     <div className="w-[280px] h-full flex flex-col bg-card border-r border-border">
 
       {/* Header */}
-      <div className="p-4 border-b border-border shrink-0 flex items-center gap-2">
+      <div className="p-4 h-16 border-b border-border shrink-0 flex items-center gap-2">
         <div className="w-6 h-6 bg-brand-primary rounded-md flex items-center justify-center text-primary-foreground">
           <Box className="w-4 h-4 text-white" />
         </div>

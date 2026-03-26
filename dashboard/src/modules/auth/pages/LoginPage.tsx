@@ -17,12 +17,14 @@ import Heading from "@/shared/components/Heading";
 import Paragraph from "@/shared/components/Paragraph";
 import ErrorText from "@/shared/components/ErrorText";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 type LoginType = z.infer<typeof loginSchema>;
 
 export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
   const { login } = useAuth();
   const [show, setShow] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -38,6 +40,7 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
 
   const onSubmit = (data: LoginType) => {
     login(data);
+    navigate("/dashboard");
   };
 
   return (

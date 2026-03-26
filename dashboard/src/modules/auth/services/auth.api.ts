@@ -15,7 +15,7 @@ export const registerApi = async (data: any) => {
   return apiClient.post('/auth/register', data);
 };
 
-export const getMeApi = async (): Promise<{ user: User }> => {
+export const getMeApi = async (): Promise<User> => {
   const res = await apiClient.get('/auth/me');
   console.log("res", res);
   return res.data.user;

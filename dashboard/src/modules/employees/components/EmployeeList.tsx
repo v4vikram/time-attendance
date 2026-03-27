@@ -6,10 +6,10 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card"
-import { useEmployees } from "../hooks/useEmployees"
 import { DataTable } from "@/shared/components/DataTable"
 import { Pagination } from "@/shared/components/Pagination"
 import { SearchTable } from "@/shared/components/SearchTable"
+import { useEmployeesQuery } from "../hooks/useEmployeesQuery"
 
 export const EmployeeList = () => {
   const [page, setPage] = useState(1)
@@ -17,7 +17,7 @@ export const EmployeeList = () => {
 
   const perPage = 5
 
-  const { employees, total, totalPages, isLoading } = useEmployees({
+  const { employees, total, totalPages, isLoading } = useEmployeesQuery({
     page,
     limit: perPage,
     q: filter.trim() || undefined,

@@ -15,8 +15,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { listEmployeesApi } from '@/modules/employees/services/employees.api';
-import type { Employee } from '@/modules/employees/services/employees.api';
+import { listEmployeesApi } from '@/modules/employees/api/employees.api';
+import type { Employee } from '@/modules/employees/types/employees.types';
+
 
 interface EmployeeDirectoryProps {
   filterValue: string;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
@@ -17,42 +17,58 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { createEmployeeApi, } from '@/modules/employees/api/employees.api';
+import {
+  updateEmployeeApi,
+} from '@/modules/employees/api/employees.api';
+
 import type {
+  Employee,
   EmployeeStatus,
 } from '@/modules/employees/types/employees.types';
 
-interface AddEmployeeModalProps {
+interface EditEmployeeModalProps {
   isOpen: boolean;
+  employee: Employee | null;
   onClose: () => void;
 }
 
-export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState<{
-    name: string;
-    email: string;
-    role: string;
-    department: string;
-    status: EmployeeStatus;
-  }>({
+export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
+  isOpen,
+  employee,
+  onClose,
+}) => {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     role: '',
     department: '',
-    status: 'Active',
+    status: 'Active' as EmployeeStatus,
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const createMutation = useMutation({
-    mutationFn: createEmployeeApi,
+  useEffect(() => {
+    if (!employee) return;
+
+    setFormData({
+      name: employee.name,
+      email: employee.email,
+      role: employee.role || '',
+      department: employee.department || '',
+      status: employee.status,
+    });
+    setError(null);
+    setSubmitted(false);
+  }, [employee, isOpen]);
+
+  const updateMutation = useMutation({
+    mutationFn: updateEmployeeApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setError(null);
       setSubmitted(false);
       onClose();
-      setFormData({ name: '', email: '', role: '', department: '', status: 'Active' });
     },
     onError: (e: any) => {
       setSubmitted(false);
@@ -60,7 +76,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
         e?.message ||
         e?.data?.message ||
         e?.response?.data?.message ||
-        'Failed to add employee';
+        'Failed to update employee';
       setError(message);
     },
   });
@@ -75,27 +91,30 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!employee?._id) return;
     setSubmitted(true);
     setError(null);
-    createMutation.mutate({ ...formData });
+    updateMutation.mutate({
+      id: employee._id,
+      ...formData,
+    });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden gap-0 rounded-xl">
         <DialogHeader className="p-5 px-6 border-b border-border">
-          <DialogTitle className="text-base font-semibold text-foreground">Add New Employee</DialogTitle>
+          <DialogTitle className="text-base font-semibold text-foreground">Edit Employee</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="name" className="text-xs font-medium text-foreground">
+            <Label htmlFor="edit-name" className="text-xs font-medium text-foreground">
               Full Name
             </Label>
             <Input
-              id="name"
+              id="edit-name"
               name="name"
-              placeholder="e.g. John Smith"
               required
               value={formData.name}
               onChange={handleChange}
@@ -104,14 +123,13 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email" className="text-xs font-medium text-foreground">
+            <Label htmlFor="edit-email" className="text-xs font-medium text-foreground">
               Email
             </Label>
             <Input
-              id="email"
+              id="edit-email"
               name="email"
               type="email"
-              placeholder="e.g. john@company.com"
               required
               value={formData.email}
               onChange={handleChange}
@@ -120,13 +138,12 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="role" className="text-xs font-medium text-foreground">
+            <Label htmlFor="edit-role" className="text-xs font-medium text-foreground">
               Role
             </Label>
             <Input
-              id="role"
+              id="edit-role"
               name="role"
-              placeholder="e.g. Senior Developer"
               required
               value={formData.role}
               onChange={handleChange}
@@ -135,13 +152,12 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="department" className="text-xs font-medium text-foreground">
+            <Label htmlFor="edit-department" className="text-xs font-medium text-foreground">
               Department
             </Label>
             <Input
-              id="department"
+              id="edit-department"
               name="department"
-              placeholder="e.g. Engineering"
               required
               value={formData.department}
               onChange={handleChange}
@@ -150,11 +166,11 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="status" className="text-xs font-medium text-foreground">
+            <Label htmlFor="edit-status" className="text-xs font-medium text-foreground">
               Status
             </Label>
             <Select value={formData.status} onValueChange={handleSelectChange} required>
-              <SelectTrigger id="status" className="text-[13px] h-9">
+              <SelectTrigger id="edit-status" className="text-[13px] h-9">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -171,7 +187,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
             <Button
               type="button"
               variant="secondary"
-              className="text-[13px] h-9"
+              className=""
               onClick={onClose}
               disabled={submitted}
             >
@@ -179,10 +195,10 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
             </Button>
             <Button
               type="submit"
-              className="text-[13px] h-9 bg-brand-primary hover:bg-brand-primary-hover text-white"
+              className=""
               disabled={submitted}
             >
-              {submitted ? 'Adding...' : 'Add Employee'}
+              {submitted ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

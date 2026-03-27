@@ -15,8 +15,9 @@ export const useAuth = () => {
   const userQuery = useQuery({
     queryKey: ['authUser'],
     queryFn: getMeApi,
-    staleTime: 0,
-    retry: 0,
+    staleTime: 1000 * 60 * 5, // ✅ 5 min cache
+    refetchOnMount: false,    // ✅ don't refetch on route change
+    refetchOnWindowFocus: false, // optional
   });
 
   const loginMutation = useMutation({

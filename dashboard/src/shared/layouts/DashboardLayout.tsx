@@ -9,9 +9,9 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="sticky top-0 z-50 h-screen">
+      <aside className="sticky top-0 z-50 h-screen">
         <AppSidebar />
-      </div>
+      </aside>
       <main className="flex-1 flex flex-col min-w-0 min-h-screen bg-background relative">
         <div className="hidden md:flex sticky top-0 z-50">
           <div className="flex-1">

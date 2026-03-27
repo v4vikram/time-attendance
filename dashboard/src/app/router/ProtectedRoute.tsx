@@ -11,7 +11,7 @@ export const ProtectedRoute = ({ allowedRoles }: Props) => {
   const { user, isLoading } = useAuth();
 
 
-  if (isLoading) {
+  if (isLoading && !user) {
     return <Loader />;
   }
 

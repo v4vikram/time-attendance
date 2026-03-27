@@ -1,13 +1,13 @@
-import { User } from '../auth/auth.model.js';
-import { ApiError } from '../../utils/ApiError.js';
+import { User } from "../auth/auth.model.js";
+import { ApiError } from "../../utils/ApiError.js";
 
 export const createEmployee = async (employeeData) => {
   const existing = await User.findOne({ email: employeeData.email });
   if (existing) {
-    throw new ApiError(400, 'Employee already exists');
+    throw new ApiError(400, "Employee already exists");
   }
 
-  const status = employeeData.status || 'Active';
+  const status = employeeData.status || "Active";
 
   // Frontend "Add Employee" modal doesn't ask for password; generate a strong-ish one.
   // This enables the user to exist in auth system, even if they need a reset flow later.
@@ -17,12 +17,12 @@ export const createEmployee = async (employeeData) => {
 
   const employee = await User.create({
     ...employeeData,
-    role: 'employee',
+    role: "employee",
     password: generatedPassword,
     jobTitle: employeeData.role,
     departmentName: employeeData.department,
     employeeStatus: status,
-    isActive: status === 'Active',
+    isActive: status === "Active",
   });
 
   const employeeResponse = employee.toObject();
@@ -35,28 +35,27 @@ export const createEmployee = async (employeeData) => {
       id: employeeResponse._id?.toString?.(),
       name: employeeResponse.name,
       email: employeeResponse.email,
-      role: employeeResponse.jobTitle || '',
-      department: employeeResponse.departmentName || '',
-      status: employeeResponse.employeeStatus || 'Active',
+      role: employeeResponse.jobTitle || "",
+      department: employeeResponse.departmentName || "",
+      status: employeeResponse.employeeStatus || "Active",
       isActive: employeeResponse.isActive,
     },
   };
-
 };
 
 export const listEmployees = async ({ page, limit, isActive, q }) => {
   const pageNum = Number(page) || 1;
   const limitNum = Number(limit) || 10;
-  const filter = { role: 'employee' };
+  const filter = { role: "employee" };
   const isActiveBool =
-    typeof isActive === 'boolean'
+    typeof isActive === "boolean"
       ? isActive
-      : typeof isActive === 'string'
-        ? isActive === 'true'
+      : typeof isActive === "string"
+        ? isActive === "true"
         : undefined;
-  if (typeof isActiveBool === 'boolean') filter.isActive = isActiveBool;
+  if (typeof isActiveBool === "boolean") filter.isActive = isActiveBool;
   if (q && q.trim()) {
-    const regex = new RegExp(q.trim(), 'i');
+    const regex = new RegExp(q.trim(), "i");
     filter.$or = [
       { name: regex },
       { email: regex },
@@ -70,7 +69,7 @@ export const listEmployees = async ({ page, limit, isActive, q }) => {
 
   const [employees, total] = await Promise.all([
     User.find(filter)
-      .select('-password')
+      .select("-password")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum),
@@ -83,9 +82,9 @@ export const listEmployees = async ({ page, limit, isActive, q }) => {
       id: emp._id?.toString?.(),
       name: emp.name,
       email: emp.email,
-      role: emp.jobTitle || '',
-      department: emp.departmentName || '',
-      status: emp.employeeStatus || 'Active',
+      role: emp.jobTitle || "",
+      department: emp.departmentName || "",
+      status: emp.employeeStatus || "Active",
       isActive: emp.isActive,
     })),
     page: pageNum,
@@ -96,9 +95,9 @@ export const listEmployees = async ({ page, limit, isActive, q }) => {
 };
 
 export const getEmployeeById = async (id) => {
-  const employee = await User.findById(id).select('-password');
-  if (!employee || employee.role !== 'employee') {
-    throw new ApiError(404, 'Employee not found');
+  const employee = await User.findById(id).select("-password");
+  if (!employee || employee.role !== "employee") {
+    throw new ApiError(404, "Employee not found");
   }
   return {
     employee: {
@@ -106,26 +105,26 @@ export const getEmployeeById = async (id) => {
       id: employee._id?.toString?.(),
       name: employee.name,
       email: employee.email,
-      role: employee.jobTitle || '',
-      department: employee.departmentName || '',
-      status: employee.employeeStatus || 'Active',
+      role: employee.jobTitle || "",
+      department: employee.departmentName || "",
+      status: employee.employeeStatus || "Active",
       isActive: employee.isActive,
     },
   };
 };
 
 export const updateEmployee = async (id, updates) => {
-  const existing = await User.findById(id).select('-password');
-  if (!existing || existing.role !== 'employee') {
-    throw new ApiError(404, 'Employee not found');
+  const existing = await User.findById(id).select("-password");
+  if (!existing || existing.role !== "employee") {
+    throw new ApiError(404, "Employee not found");
   }
 
   if (updates.email && updates.email !== existing.email) {
     const conflict = await User.findOne({ email: updates.email });
-    if (conflict) throw new ApiError(400, 'Email already exists');
+    if (conflict) throw new ApiError(400, "Email already exists");
   }
 
-  const status = updates.status || existing.employeeStatus || 'Active';
+  const status = updates.status || existing.employeeStatus || "Active";
 
   const updated = await User.findByIdAndUpdate(
     id,
@@ -138,14 +137,14 @@ export const updateEmployee = async (id, updates) => {
         jobTitle: updates.role,
         departmentName: updates.department,
         employeeStatus: status,
-        isActive: status === 'Active',
-        role: 'employee',
+        isActive: status === "Active",
+        role: "employee",
       },
     },
-    { new: true, runValidators: true }
-  ).select('-password');
+    { new: true, runValidators: true },
+  ).select("-password");
 
-  if (!updated) throw new ApiError(404, 'Employee not found');
+  if (!updated) throw new ApiError(404, "Employee not found");
 
   return {
     employee: {
@@ -153,23 +152,19 @@ export const updateEmployee = async (id, updates) => {
       id: updated._id?.toString?.(),
       name: updated.name,
       email: updated.email,
-      role: updated.jobTitle || '',
-      department: updated.departmentName || '',
-      status: updated.employeeStatus || 'Active',
+      role: updated.jobTitle || "",
+      department: updated.departmentName || "",
+      status: updated.employeeStatus || "Active",
       isActive: updated.isActive,
     },
   };
 };
 
 export const deleteEmployee = async (id) => {
-  const updated = await User.findByIdAndUpdate(
-    id,
-    { $set: { isActive: false, employeeStatus: 'Offline', role: 'employee' } },
-    { new: true, runValidators: true }
-  ).select('-password');
+  const updated = await User.findByIdAndDelete(id);
 
-  if (!updated || updated.role !== 'employee') {
-    throw new ApiError(404, 'Employee not found');
+  if (!updated || updated.role !== "employee") {
+    throw new ApiError(404, "Employee not found");
   }
 
   return {
@@ -178,12 +173,36 @@ export const deleteEmployee = async (id) => {
       id: updated._id?.toString?.(),
       name: updated.name,
       email: updated.email,
-      role: updated.jobTitle || '',
-      department: updated.departmentName || '',
-      status: updated.employeeStatus || 'Offline',
+      role: updated.jobTitle || "",
+      department: updated.departmentName || "",
+      status: updated.employeeStatus || "Offline",
       isActive: updated.isActive,
     },
-    message: 'Employee deactivated successfully',
+    message: "Employee deactivated successfully",
   };
 };
+// export const deleteEmployee = async (id) => {
+//   const updated = await User.findByIdAndUpdate(
+//     id,
+//     { $set: { isActive: false, employeeStatus: 'Offline', role: 'employee' } },
+//     { new: true, runValidators: true }
+//   ).select('-password');
 
+//   if (!updated || updated.role !== 'employee') {
+//     throw new ApiError(404, 'Employee not found');
+//   }
+
+//   return {
+//     employee: {
+//       _id: updated._id,
+//       id: updated._id?.toString?.(),
+//       name: updated.name,
+//       email: updated.email,
+//       role: updated.jobTitle || '',
+//       department: updated.departmentName || '',
+//       status: updated.employeeStatus || 'Offline',
+//       isActive: updated.isActive,
+//     },
+//     message: 'Employee deactivated successfully',
+//   };
+// };

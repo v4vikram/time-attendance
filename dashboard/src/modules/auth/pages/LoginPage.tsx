@@ -17,7 +17,7 @@ import Heading from "@/shared/components/Heading";
 import Paragraph from "@/shared/components/Paragraph";
 import ErrorText from "@/shared/components/ErrorText";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type LoginType = z.infer<typeof loginSchema>;
 
@@ -38,8 +38,8 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
     },
   });
 
-  const onSubmit = (data: LoginType) => {
-    login(data);
+  const onSubmit = async (data: LoginType) => {
+    await login(data); // ✅ wait for login to finish
     navigate("/dashboard");
   };
 
@@ -87,6 +87,12 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
             {errors.password && (
               <ErrorText message={errors.password.message!} />
             )}
+
+            <div className="mt-2 text-right">
+              <Button asChild variant="link" className="h-auto p-0">
+                <Link to="/forgot-password">Forgot password?</Link>
+              </Button>
+            </div>
           </div>
 
           <Button type="submit" className="w-full flex gap-2">

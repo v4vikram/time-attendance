@@ -4,10 +4,14 @@ import { routes } from "./routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import DashboardLayout from "@/shared/layouts/DashboardLayout";
 import AuthPage from "@/modules/auth/pages/AuthPage";
+import ResetPasswordPage from "@/modules/auth/pages/ResetPasswordPage";
+import ForgotPasswordPage from "@/modules/auth/pages/ForgotPasswordPage";
 
 export const AppRouter = () => {
   return (
     <Routes>
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/" element={<AuthPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>

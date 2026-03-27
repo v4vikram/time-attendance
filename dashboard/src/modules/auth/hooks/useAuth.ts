@@ -1,5 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { loginApi, registerApi, getMeApi, logoutApi } from '@/modules/auth/services/auth.api';
+import {
+  loginApi,
+  registerApi,
+  getMeApi,
+  logoutApi,
+  forgotPasswordApi,
+  resetPasswordApi,
+} from '@/modules/auth/services/auth.api';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useAuth = () => {
@@ -32,12 +39,25 @@ export const useAuth = () => {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: forgotPasswordApi,
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: resetPasswordApi,
+  });
+
   return {
     user: userQuery.data,
     isLoading: userQuery.isLoading,
+    isAuthenticating: loginMutation.isPending || registerMutation.isPending,
+    isResettingPassword: resetPasswordMutation.isPending,
+    isSendingResetLink: forgotPasswordMutation.isPending,
 
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
+    forgotPassword: forgotPasswordMutation.mutateAsync,
+    resetPassword: resetPasswordMutation.mutateAsync,
   };
 };

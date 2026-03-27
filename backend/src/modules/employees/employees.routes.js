@@ -20,14 +20,14 @@ import {
 
 const router = Router();
 
-// Only admins can manage employees.
-router.use(protect, restrictTo('admin'));
+// Auth required for all employee endpoints.
+// Admin can create/update/delete; both admin and employee can view.
+router.get('/', protect, restrictTo('admin', 'employee'), validate(listEmployeesSchema), getEmployees);
+router.get('/:id', protect, restrictTo('admin', 'employee'), validate(getEmployeeSchema), getEmployeeById);
 
-router.post('/', validate(createEmployeeSchema), createEmployee);
-router.get('/', validate(listEmployeesSchema), getEmployees);
-router.get('/:id', validate(getEmployeeSchema), getEmployeeById);
-router.put('/:id', validate(updateEmployeeSchema), updateEmployee);
-router.delete('/:id', validate(deleteEmployeeSchema), deleteEmployee);
+router.post('/', protect, restrictTo('admin'), validate(createEmployeeSchema), createEmployee);
+router.put('/:id', protect, restrictTo('admin'), validate(updateEmployeeSchema), updateEmployee);
+router.delete('/:id', protect, restrictTo('admin'), validate(deleteEmployeeSchema), deleteEmployee);
 
 export default router;
 

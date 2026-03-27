@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    passwordResetToken: {
+      type: String,
+    },
+    passwordResetExpires: {
+      type: Date,
+    },
     role: {
       type: String,
       enum: ['admin', 'employee'],
@@ -30,6 +36,18 @@ const userSchema = new mongoose.Schema(
     shiftId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Shift',
+    },
+    // For the frontend "Employees" UI. These are display fields (not used by auth).
+    departmentName: {
+      type: String,
+    },
+    jobTitle: {
+      type: String,
+    },
+    employeeStatus: {
+      type: String,
+      enum: ['Active', 'On Leave', 'Offline'],
+      default: 'Active',
     },
     isActive: {
       type: Boolean,

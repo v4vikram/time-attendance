@@ -9,14 +9,9 @@ import { useEmployees } from "../hooks/useEmployees"
 import { DataTable } from "@/shared/components/DataTable"
 import { SearchTable } from "@/shared/components/SearchTable"
 import { Pagination } from "@/shared/components/Pagination"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import type { ColumnDef } from "@tanstack/react-table"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import type{ ColumnDef } from "@tanstack/react-table"
+
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -85,6 +80,8 @@ const EmployeePage = () => {
     q: filter.trim() || undefined,
   })
 
+
+
   const isAdmin = user?.role === "admin"
 
   return (
@@ -98,7 +95,7 @@ const EmployeePage = () => {
           ]}
         />
         <div className="flex items-end justify-between">
-          <Heading as="h4">Employees Management</Heading>
+        <Heading as="h4">Employees Management</Heading>
           {isAdmin && (
             <Button
               onClick={() => setModalOpen(true)}

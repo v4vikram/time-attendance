@@ -9,7 +9,7 @@ import { WorkforceOverview } from "@/modules/dashboard/components/WorkforceOverv
 import { EmployeeDirectory } from "@/modules/dashboard/components/EmployeeDirectory"
 import { RecentActivity } from "@/modules/dashboard/components/RecentActivity"
 import { AddEmployeeModal } from "@/modules/dashboard/components/AddEmployeeModal"
-import { AppBreadcrumb } from "@/shared/components/AppBreadcrumb"
+import { AppBreadcrumb } from "@/shared/components"
 
 const DashboardPage: React.FC = () => {
   const { searchValue, setSearchValue } = useOutletContext<{

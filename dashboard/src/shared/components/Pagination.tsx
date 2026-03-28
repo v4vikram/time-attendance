@@ -8,7 +8,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export const Pagination = ({
+const Pagination = ({
   page,
   totalPages,
   total,
@@ -42,3 +42,5 @@ export const Pagination = ({
     </div>
   );
 };
+
+export default Pagination

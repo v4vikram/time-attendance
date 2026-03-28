@@ -3,43 +3,46 @@ import { Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/modules/auth/hooks/useAuth"
 import { AddEmployeeModal } from "@/modules/employees/components/AddEmployeeModal"
-import { AppBreadcrumb } from "@/shared/components/AppBreadcrumb"
-import Heading from "@/shared/components/Heading"
-import { DataTable } from "@/shared/components/DataTable"
-import { SearchTable } from "@/shared/components/SearchTable"
-import { Pagination } from "@/shared/components/Pagination"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import type { ColumnDef } from "@tanstack/react-table"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  AppBreadcrumb,
+  Heading,
+  DataTable,
+  SearchTable,
+  Pagination,
+} from "@/shared/components"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { EditEmployeeModal } from "../components/EditEmployeeModal"
-import { deleteEmployeeApi } from "../api/employees.api"
-import type {  Employee } from "@/modules/employees/types/employees.types"
+import type { Employee } from "@/modules/employees/types/employees.types"
 import { useEmployeesQuery } from "../hooks/useEmployeesQuery"
 import { useEmployeeMutations } from "../hooks/useEmployeeMutations"
+import { getEmployeeColumns } from "./employee-columns"
 
 const EmployeePage = () => {
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState("")
   const [modalOpen, setModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  )
   const { user } = useAuth()
-  const queryClient = useQueryClient()
+
   const perPage = 5
 
-  const { employees, total, totalPages, isLoading } = useEmployeesQuery({page,limit: perPage,q: filter.trim() || undefined, })
-  const {deleteEmployee} = useEmployeeMutations()
-
-
+  const { employees, total, totalPages, isLoading } = useEmployeesQuery({
+    page,
+    limit: perPage,
+    q: filter.trim() || undefined,
+  })
+  const { deleteEmployee, isDeleting } = useEmployeeMutations()
 
   const isAdmin = user?.role === "admin"
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteEmployeeApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] })
-    },
-  })
 
   const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee)
@@ -47,66 +50,18 @@ const EmployeePage = () => {
   }
 
   const handleDelete = async (employeeId: string) => {
-    const confirmed = window.confirm("Are you sure you want to deactivate this employee?")
-    if (!confirmed) return
     await deleteEmployee(employeeId)
   }
 
-  const columns: ColumnDef<Employee>[] = useMemo(
-    () => [
-      {
-        accessorKey: "name",
-        header: "Employee",
-      },
-      {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => row.original.role || "-",
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
-      },
-      {
-        accessorKey: "department",
-        header: "Department",
-        cell: ({ row }) => row.original.department || "-",
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => {
-          const employee = row.original
-
-          return (
-            <div className="flex items-center gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleEdit(employee)}
-                disabled={!isAdmin}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-
-              <Button
-                size="icon"
-                variant="destructive"
-                onClick={() => handleDelete(employee._id)}
-                disabled={!isAdmin || deleteMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )
-        },
-      },
-    ],
-    [deleteMutation.isPending, isAdmin]
+  const columns = useMemo(
+    () =>
+      getEmployeeColumns({
+        handleEdit,
+        handleDelete,
+        isAdmin,
+        isDeleting,
+      }),
+    [handleEdit, handleDelete, isAdmin, isDeleting]
   )
 
   return (
@@ -120,7 +75,7 @@ const EmployeePage = () => {
           ]}
         />
         <div className="flex items-end justify-between">
-        <Heading as="h4">Employees Management</Heading>
+          <Heading as="h4">Employees Management</Heading>
           {isAdmin && (
             <Button
               onClick={() => setModalOpen(true)}

@@ -20,7 +20,7 @@ import {
     items: BreadcrumbItemType[];
   };
   
-  export const AppBreadcrumb = ({ items }: Props) => {
+  const AppBreadcrumb = ({ items }: Props) => {
     return (
       <Breadcrumb>
         <BreadcrumbList>
@@ -47,3 +47,5 @@ import {
       </Breadcrumb>
     );
   };
+
+  export default AppBreadcrumb

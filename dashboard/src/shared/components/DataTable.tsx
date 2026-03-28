@@ -25,7 +25,7 @@ interface Props<T> {
   emptyText?: string
 }
 
-export function DataTable<T>({
+function DataTable<T>({
   data,
   columns,
   isLoading,
@@ -87,3 +87,5 @@ export function DataTable<T>({
     </Table>
   )
 }
+
+export default DataTable

@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-export const SearchTable = ({
+const SearchTable = ({
   value,
   onChange,
   placeholder = "Search...",
@@ -47,3 +47,5 @@ export const SearchTable = ({
     </div>
   );
 };
+
+export default SearchTable

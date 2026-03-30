@@ -1,16 +1,21 @@
 import { useState } from "react"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/shared/layouts/AppSidebar"
 import { Outlet } from "react-router-dom"
-import { Topbar } from "@/shared/components/layout/Topbar"
+import { Topbar } from "@/shared/layouts/Topbar"
+import type { Role } from "../types"
+import { useAuth } from "@/modules/auth/hooks/useAuth"
+
 
 export default function DashboardLayout() {
   const [searchValue, setSearchValue] = useState("")
+  const {user} = useAuth()
+  const role: Role = user?.role ?? "employee";
 
   return (
     <SidebarProvider>
       <aside className="sticky top-0 z-50 h-screen">
-        <AppSidebar />
+        <AppSidebar role={role}/>
       </aside>
       <main className="flex-1 flex flex-col min-w-0 min-h-screen bg-background relative">
         <div className="hidden md:flex sticky top-0 z-50">

@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { Plus, } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/modules/auth/hooks/useAuth"
 import { AddEmployeeModal } from "@/modules/employees/components/AddEmployeeModal"
 import {
   AppBreadcrumb,
-  Heading,
   DataTable,
   SearchTable,
   Pagination,
@@ -74,8 +73,8 @@ const EmployeePage = () => {
             { label: "Employees" },
           ]}
         />
-        <div className="flex items-end justify-between">
-          <Heading as="h4">Employees Management</Heading>
+        <div className="flex items-end justify-end">
+          {/* <Heading as="h4">Employees Management</Heading> */}
           {isAdmin && (
             <Button
               onClick={() => setModalOpen(true)}

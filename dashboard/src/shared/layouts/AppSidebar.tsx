@@ -1,131 +1,127 @@
-import React from 'react';
-import {
-  LayoutGrid,
-  Users,
-  Calendar,
-  DollarSign,
-  Layers,
-  BarChart2,
-  Settings,
-  ChevronDown,
-  Box,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { SidebarHeader } from '@/components/ui/sidebar';
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  hasChildren?: boolean;
-}
+import  { useState } from "react"
+import { ChevronDown, Box } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { cn } from "@/lib/utils"
+import { routes } from "@/app/router/routes"
+import type { AppRoute, Role } from "../types"
 
 interface SidebarProps {
-  activeNav: string;
-  setActiveNav: (id: string) => void;
-  employeesExpanded: boolean;
-  setEmployeesExpanded: (expanded: boolean) => void;
+  role: Role
 }
 
-export const AppSidebar: React.FC<SidebarProps> = ({
-  activeNav,
-  setActiveNav,
-  employeesExpanded,
-  setEmployeesExpanded,
-}) => {
-  const navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid className="w-4 h-4" /> },
-    { id: 'employees', label: 'Employees', icon: <Users className="w-4 h-4" />, hasChildren: true },
-    { id: 'attendance', label: 'Attendance', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'payroll', label: 'Payroll', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'projects', label: 'Projects', icon: <Layers className="w-4 h-4" /> },
-  ];
+export const AppSidebar = ({ role }: SidebarProps) => {
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const adminItems: NavItem[] = [
-    { id: 'reports', label: 'Reports', icon: <BarChart2 className="w-4 h-4" /> },
-    { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
-  ];
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
 
-  const handleNavClick = (item: NavItem) => {
-    setActiveNav(item.id);
-    if (item.hasChildren) {
-      setEmployeesExpanded(!employeesExpanded);
-    }
-  };
+  const toggleMenu = (id: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
 
-  const NavItemComponent = ({ item }: { item: NavItem }) => {
-    const isActive = activeNav === item.id;
+  // ✅ filter routes directly
+  const filteredRoutes = routes.filter((route) => route.roles.includes(role))
+
+  const isActive = (path?: string) => location.pathname === path
+
+  const isChildActive = (route: AppRoute) =>
+    route.children?.some(
+      (child) => child.roles.includes(role) && location.pathname === child.path
+    )
+
+  const NavItem = ({ route }: { route: AppRoute }) => {
+    // ✅ filter children directly
+    const children = route.children?.filter((child) =>
+      child.roles.includes(role)
+    )
+
+    const open = openMenus[route.id] || isChildActive(route)
+    const active = isActive(route.path) || isChildActive(route)
+    const Icon = route.icon
+
     return (
       <div className="mb-1">
         <button
-          onClick={() => handleNavClick(item)}
+          onClick={() => {
+            if (children && children.length > 0) {
+              toggleMenu(route.id)
+            } else if (route.path) {
+              navigate(route.path)
+            }
+          }}
           className={cn(
-            'flex items-center justify-between w-full px-3 py-2 rounded-lg text-[13px] transition-colors',
-            isActive
-              ? 'bg-brand-subtle text-brand-primary font-medium'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+            "flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] transition-colors",
+            active
+              ? "bg-brand-subtle text-brand-primary font-medium"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
         >
-          <div className={cn("flex items-center gap-3", isActive && "text-brand-primary")}>
-            {item.icon}
-            {item.label}
+          <div className="flex items-center gap-3">
+          {Icon && <Icon className="h-4 w-4" />}
+            {route.label}
           </div>
-          {item.hasChildren && (
-            <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", employeesExpanded && "rotate-180")} />
+
+          {children && children.length > 0 && (
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 transition-transform",
+                open && "rotate-180"
+              )}
+            />
           )}
         </button>
-        {item.hasChildren && employeesExpanded && (
-          <div className="pl-9 flex flex-col gap-1 mt-1 mb-2">
-            {['All Employees', 'Departments', 'Designations'].map((sub, i) => (
-              <button
-                key={sub}
+
+        {/* CHILDREN */}
+        {children && children.length > 0 && open && (
+          <div className="mt-1 mb-2 flex flex-col gap-1 pl-3">
+            {children.map((child) => {
+              const childActive = isActive(child.path)
+              const Icon =  child.icon
+
+              return (
+                <button
+                key={child.id}
+                onClick={() => navigate(child.path)}
                 className={cn(
-                  'text-left px-3 py-1.5 rounded-lg text-xs transition-colors',
-                  i === 0
-                    ? 'text-foreground font-medium hover:bg-accent'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  "flex items-center gap-2 rounded-lg  py-1.5 text-left px-3 text-xs transition-colors",
+                  childActive
+                    ? "bg-accent font-medium text-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >
-                {sub}
+                {/* ✅ ICON */}
+                {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+      
+                {/* ✅ LABEL */}
+                <span>{child.label}</span>
               </button>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
-    );
-  };
+    )
+  }
 
   return (
-    <div className="w-[280px] h-full flex flex-col bg-card border-r border-border">
-
-      {/* Header */}
-      <div className="p-4 h-16 border-b border-border shrink-0 flex items-center gap-2">
-        <div className="w-6 h-6 bg-brand-primary rounded-md flex items-center justify-center text-primary-foreground">
-          <Box className="w-4 h-4 text-white" />
+    <aside className="flex h-full w-[280px] flex-col border-r border-border bg-card">
+      {/* HEADER */}
+      <div className="flex h-16 items-center gap-2 border-b border-border p-4">
+        <div className="bg-brand-primary flex h-6 w-6 items-center justify-center rounded-md text-primary-foreground">
+          <Box className="h-4 w-4 text-white" />
         </div>
         <span className="font-semibold">TimeWatch</span>
       </div>
 
-      {/* Scrollable Menu */}
+      {/* NAV */}
       <div className="flex-1 overflow-y-auto p-3">
-
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mt-2 mb-2 ml-3">
-          Main Menu
-        </div>
-
-        {navItems.map((item) => (
-          <NavItemComponent key={item.id} item={item} />
+        {filteredRoutes.map((route) => (
+          <NavItem key={route.id} route={route} />
         ))}
-
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mt-6 mb-2 ml-3">
-          Admin
-        </div>
-
-        {adminItems.map((item) => (
-          <NavItemComponent key={item.id} item={item} />
-        ))}
-
       </div>
-    </div>
-  );
-};
+    </aside>
+  )
+}

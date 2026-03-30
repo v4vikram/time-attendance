@@ -3,11 +3,8 @@ import Loader from "@/shared/components/Loader";
 import { Navigate, Outlet } from "react-router-dom";
 
 
-type Props = {
-  allowedRoles?: string[];
-};
 
-export const ProtectedRoute = ({ allowedRoles }: Props) => {
+export const ProtectedRoute = () => {
   const { user, isLoading } = useAuth();
 
 

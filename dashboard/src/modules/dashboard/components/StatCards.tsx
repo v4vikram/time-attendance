@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Users, CheckCircle, Calendar, UserPlus, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 

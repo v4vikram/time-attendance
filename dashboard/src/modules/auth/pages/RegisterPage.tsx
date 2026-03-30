@@ -21,11 +21,11 @@ import { useAuth } from "../hooks/useAuth";
 type RegisterType = z.infer<typeof registerSchema>;
 
 export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
-    const { register } = useAuth();
+    const { register:registerUser  } = useAuth();
     const [show, setShow] = useState(false);
 
     const {
-        register: registerForm,
+        register,
         handleSubmit,
         formState: { errors },
     } = useForm<RegisterType>({
@@ -38,7 +38,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     });
 
     const onSubmit = (data: RegisterType) => {
-        register(data);
+        registerUser(data);
     };
 
     return (

@@ -6,9 +6,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card"
-import { DataTable } from "@/shared/components/DataTable"
-import { Pagination } from "@/shared/components/Pagination"
-import { SearchTable } from "@/shared/components/SearchTable"
+import { DataTable, Pagination, SearchTable } from "@/shared/components"
 import { useEmployeesQuery } from "../hooks/useEmployeesQuery"
 
 export const EmployeeList = () => {

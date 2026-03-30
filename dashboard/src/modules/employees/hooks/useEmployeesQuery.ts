@@ -6,7 +6,8 @@ export const useEmployeesQuery = ({ page, limit, q }: ListEmployeesParams) => {
     const query = useQuery({
       queryKey: ["employees", page, limit, q],
       queryFn: () => listEmployeesApi({ page, limit, q }),
-      keepPreviousData: true,
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
     });
   
     return {

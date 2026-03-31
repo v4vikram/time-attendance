@@ -1,8 +1,9 @@
 
 import DashboardPage from "@/modules/dashboard/pages/DashboardPage";
 import EmployeePage from "@/modules/employees/pages/EmployeePage";
+import AttendancePage from "@/modules/attendance/pages/AttendancePage";
 import type { AppRoute } from "@/shared/types";
-import { LayoutDashboard, Users, Settings, List } from "lucide-react";
+import { LayoutDashboard, Users, Settings, List, CalendarDays } from "lucide-react";
 
 
 
@@ -13,6 +14,14 @@ export const routes: AppRoute[] = [
     element: <DashboardPage />,
     label: "Dashboard",
     icon: LayoutDashboard,
+    roles: ["admin", "employee"],
+  },
+  {
+    id: "attendance",
+    path: "/attendance",
+    element: <AttendancePage />,
+    label: "Attendance",
+    icon: CalendarDays,
     roles: ["admin", "employee"],
   },
   {

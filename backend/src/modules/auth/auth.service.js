@@ -41,7 +41,7 @@ export const loginUser = async (body, res) => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
-  return userResponse;
+  return {userResponse, token};
 };
 
 export const getCurrentUser = async (userId) => {
@@ -73,7 +73,7 @@ export const forgetPassword = async (body) => {
 
   // Generate token
   const resetToken = crypto.randomBytes(32).toString("hex");
-  // console.log("RESET TOKEN:", resetToken, resetToken.length);
+  console.log("RESET TOKEN:", resetToken, resetToken.length);
 
   const hashedToken = crypto
     .createHash("sha256")

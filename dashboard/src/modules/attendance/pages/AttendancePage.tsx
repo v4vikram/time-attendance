@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Plus, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { useTodayAttendanceQuery } from '@/modules/attendance/hooks/useTodayAtte
 import { useAttendanceMutations } from '@/modules/attendance/hooks/useAttendanceMutations';
 import { getAttendanceColumns } from './attendance-columns';
 import { AttendanceModal } from '@/modules/attendance/components/AttendanceModal';
+import { useInactivityTimer } from '@/modules/attendance/hooks/useInactivityTimer';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import type { AttendanceRecord } from '@/modules/attendance/types/attendance.types';
@@ -48,12 +49,57 @@ const AttendancePage = () => {
     isDeleting,
     isCheckingIn,
     isCheckingOut,
+    pause,
+    resume,
   } = useAttendanceMutations();
 
   const { attendance: todayAttendance, isLoading: isTodayLoading } = useTodayAttendanceQuery();
 
   const canCheckIn = !todayAttendance?.checkIn;
   const canCheckOut = Boolean(todayAttendance?.checkIn && !todayAttendance?.checkOut);
+  const isCurrentlyPaused = Boolean(todayAttendance?.isPaused);
+
+  const [liveActiveMins, setLiveActiveMins] = useState(0);
+
+  useEffect(() => {
+    if (!todayAttendance) {
+      setLiveActiveMins(0);
+      return;
+    }
+    const updateTimer = () => {
+      let mins = todayAttendance.totalActiveMinutes || 0;
+      if (!todayAttendance.isPaused && todayAttendance.activeSince) {
+        const diff = (Date.now() - new Date(todayAttendance.activeSince).getTime()) / (1000 * 60);
+        mins += diff;
+      }
+      setLiveActiveMins(Math.max(0, mins));
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000); // 1 minute
+    return () => clearInterval(interval);
+  }, [todayAttendance]);
+
+  useInactivityTimer({
+    timeoutMs: 1 * 60 * 1000, // 1 minute
+    isActive: canCheckOut && !isAdmin, // ✅ FIXED
+    onIdle: () => {
+      pause(undefined, {
+        onSuccess: () => toast.info('Paused due to inactivity'),
+      });
+    },
+    onActive: () => {
+      resume(undefined, {
+        onSuccess: () => toast.success('Resumed automatically'),
+      });
+    },
+  });
+
+  const formatTime = (totalMins: number) => {
+    const h = Math.floor(totalMins / 60);
+    const m = Math.floor(totalMins % 60);
+    return `${h}h ${m}m`;
+  };
 
   const handleCheckIn = () => {
     checkIn(false, {
@@ -181,6 +227,18 @@ const AttendancePage = () => {
                 >
                   {isCheckingOut ? 'Checking out...' : canCheckOut ? 'Check out' : 'Checked out'}
                 </Button>
+                {canCheckOut && (
+                  <Button
+                    variant={isCurrentlyPaused ? "default" : "outline"}
+                    onClick={() => {
+                      if (isCurrentlyPaused) resume(undefined, { onSuccess: () => toast.success('Resumed') });
+                      else pause(undefined, { onSuccess: () => toast.info('Paused') });
+                    }}
+                    disabled={isTodayLoading}
+                  >
+                    {isCurrentlyPaused ? 'Resume Work' : 'Pause Work'}
+                  </Button>
+                )}
               </div>
             </CardHeader>
 
@@ -193,6 +251,12 @@ const AttendancePage = () => {
                 <div className="text-sm text-muted-foreground">Check-in</div>
                 <div className="text-base font-medium">
                   {todayAttendance?.checkIn ? dayjs(todayAttendance.checkIn).format('HH:mm') : '-'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Active Time</div>
+                <div className="text-base font-medium">
+                  {isTodayLoading ? '-' : formatTime(liveActiveMins)} {isCurrentlyPaused && <span className="text-xs text-amber-500 font-normal ml-1">(Paused)</span>}
                 </div>
               </div>
               <div>
@@ -296,13 +360,13 @@ const AttendancePage = () => {
         initialValues={
           selectedAttendance
             ? {
-                employeeId: selectedAttendance.employee,
-                date: selectedAttendance.date,
-                checkIn: selectedAttendance.checkIn ?? '',
-                checkOut: selectedAttendance.checkOut ?? '',
-                remarks: selectedAttendance.remarks,
-                isAutoCheckout: false,
-              }
+              employeeId: selectedAttendance.employee,
+              date: selectedAttendance.date,
+              checkIn: selectedAttendance.checkIn ?? '',
+              checkOut: selectedAttendance.checkOut ?? '',
+              remarks: selectedAttendance.remarks,
+              isAutoCheckout: false,
+            }
             : undefined
         }
         isAdmin={isAdmin}

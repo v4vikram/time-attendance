@@ -18,6 +18,10 @@ export type AttendanceRecord = {
   workingHours?: number;
   late?: boolean;
   earlyLeave?: boolean;
+  isAutoCheckout?: boolean;
+  isPaused?: boolean;
+  totalActiveMinutes?: number;
+  activeSince?: string;
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;

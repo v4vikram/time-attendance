@@ -29,6 +29,16 @@ export const checkOutAttendanceApi = async (isAutoCheckout = false): Promise<Att
   return res.data;
 };
 
+export const pauseAttendanceApi = async (): Promise<AttendanceRecord> => {
+  const res = await apiClient.post('/attendance/pause');
+  return res.data;
+};
+
+export const resumeAttendanceApi = async (): Promise<AttendanceRecord> => {
+  const res = await apiClient.post('/attendance/resume');
+  return res.data;
+};
+
 export const createAttendanceApi = async (
   data: CreateAttendanceInput
 ) => {

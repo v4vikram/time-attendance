@@ -5,6 +5,8 @@ import {
   updateAttendanceApi,
   checkInAttendanceApi,
   checkOutAttendanceApi,
+  pauseAttendanceApi,
+  resumeAttendanceApi,
 } from '@/modules/attendance/api/attendance.api';
 
 export const useAttendanceMutations = () => {
@@ -40,21 +42,37 @@ export const useAttendanceMutations = () => {
     onSuccess: invalidateAttendance,
   });
 
+  const pauseMutation = useMutation({
+    mutationFn: pauseAttendanceApi,
+    onSuccess: invalidateAttendance,
+  });
+
+  const resumeMutation = useMutation({
+    mutationFn: resumeAttendanceApi,
+    onSuccess: invalidateAttendance,
+  });
+
   return {
     createAttendance: createMutation.mutate,
     updateAttendance: updateMutation.mutate,
     deleteAttendance: deleteMutation.mutate,
     checkIn: checkInMutation.mutate,
     checkOut: checkOutMutation.mutate,
+    pause: pauseMutation.mutate,
+    resume: resumeMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isCheckingIn: checkInMutation.isPending,
     isCheckingOut: checkOutMutation.isPending,
+    isPausing: pauseMutation.isPending,
+    isResuming: resumeMutation.isPending,
     createError: createMutation.error,
     updateError: updateMutation.error,
     deleteError: deleteMutation.error,
     checkInError: checkInMutation.error,
     checkOutError: checkOutMutation.error,
+    pauseError: pauseMutation.error,
+    resumeError: resumeMutation.error,
   };
 };

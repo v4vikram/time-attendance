@@ -33,6 +33,16 @@ export const checkOutToday = catchAsync(async (req, res) => {
   res.status(200).json(new ApiResponse(200, result, 'Checked out successfully'));
 });
 
+export const pauseAttendance = catchAsync(async (req, res) => {
+  const result = await attendanceService.pauseAttendance(req.user._id);
+  res.status(200).json(new ApiResponse(200, result, 'Attendance paused successfully'));
+});
+
+export const resumeAttendance = catchAsync(async (req, res) => {
+  const result = await attendanceService.resumeAttendance(req.user._id);
+  res.status(200).json(new ApiResponse(200, result, 'Attendance resumed successfully'));
+});
+
 export const updateAttendance = catchAsync(async (req, res) => {
   const result = await attendanceService.updateAttendance(req.params.id, req.body);
   res.status(200).json(new ApiResponse(200, result, 'Attendance record updated successfully'));

@@ -4,6 +4,7 @@ export const calculateAttendance = ({
   checkIn,
   checkOut,
   isAutoCheckout = false, // 🔥 important
+  totalActiveMinutes,
 }) => {
   // ❌ No check-in
   if (!checkIn) {
@@ -39,8 +40,9 @@ export const calculateAttendance = ({
   }
 
   // ⏱ Working hours
-  let workingHours =
-    (checkOutTime - checkInTime) / (1000 * 60 * 60);
+  let workingHours = totalActiveMinutes !== undefined 
+    ? totalActiveMinutes / 60 
+    : (checkOutTime - checkInTime) / (1000 * 60 * 60);
 
   // 🔒 Prevent fake full-day via auto-checkout
   if (isAutoCheckout) {

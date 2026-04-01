@@ -13,6 +13,16 @@ const attendanceSchema = new mongoose.Schema(
     },
     checkIn: Date,
     checkOut: Date,
+    activeSince: Date,
+    lastActivity: Date,
+    totalActiveMinutes: {
+      type: Number,
+      default: 0,
+    },
+    isPaused: {
+      type: Boolean,
+      default: false,
+    },
 
     status: {
       type: String,
@@ -25,6 +35,7 @@ const attendanceSchema = new mongoose.Schema(
         'holiday',
         'weekend',
         'pending',
+        'invalid',
       ],
       default: 'present',
     },

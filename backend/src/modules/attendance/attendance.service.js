@@ -40,6 +40,9 @@ const formatAttendance = (attendance) => ({
   late: attendance.late,
   earlyLeave: attendance.earlyLeave,
   isAutoCheckout: attendance.isAutoCheckout,
+  isPaused: attendance.isPaused,
+  totalActiveMinutes: attendance.totalActiveMinutes,
+  activeSince: attendance.activeSince,
   createdBy: attendance.createdBy,
   updatedBy: attendance.updatedBy,
   createdAt: attendance.createdAt,
@@ -72,11 +75,15 @@ export const checkInToday = async (userId, isAutoCheckout = false) => {
   }
 
   attendance.checkIn = new Date();
+  attendance.activeSince = new Date();
+  attendance.isPaused = false;
+  attendance.totalActiveMinutes = 0;
 
   const result = calculateAttendance({
     checkIn: attendance.checkIn,
     checkOut: attendance.checkOut,
     isAutoCheckout: attendance.isAutoCheckout,
+    totalActiveMinutes: attendance.totalActiveMinutes,
   });
 
   attendance.status = result.status;
@@ -103,16 +110,71 @@ export const checkOutToday = async (userId, isAutoCheckout = false) => {
   attendance.checkOut = new Date();
   attendance.isAutoCheckout = isAutoCheckout;
 
+  if (!attendance.isPaused && attendance.activeSince) {
+    const activeMins = (attendance.checkOut - attendance.activeSince) / (1000 * 60);
+    attendance.totalActiveMinutes = (attendance.totalActiveMinutes || 0) + activeMins;
+  }
+  attendance.isPaused = true;
+
   const result = calculateAttendance({
     checkIn: attendance.checkIn,
     checkOut: attendance.checkOut,
     isAutoCheckout: attendance.isAutoCheckout,
+    totalActiveMinutes: attendance.totalActiveMinutes,
   });
 
   attendance.status = result.status;
   attendance.workingHours = result.workingHours;
   attendance.late = result.late;
   attendance.earlyLeave = result.earlyLeave;
+
+  await attendance.save();
+  return formatAttendance(attendance);
+};
+
+export const pauseAttendance = async (userId) => {
+  const date = normalizeDate(new Date());
+  const attendance = await Attendance.findOne({ employee: userId, date });
+
+  if (!attendance || !attendance.checkIn) {
+    throw new ApiError(400, 'Cannot pause without a check-in');
+  }
+  if (attendance.checkOut) {
+    throw new ApiError(400, 'Already checked out for today');
+  }
+  if (attendance.isPaused) {
+    throw new ApiError(400, 'Attendance is already paused');
+  }
+
+  const now = new Date();
+  if (attendance.activeSince) {
+    const activeMins = (now - attendance.activeSince) / (1000 * 60);
+    attendance.totalActiveMinutes = (attendance.totalActiveMinutes || 0) + activeMins;
+  }
+
+  attendance.isPaused = true;
+  attendance.lastActivity = now;
+
+  await attendance.save();
+  return formatAttendance(attendance);
+};
+
+export const resumeAttendance = async (userId) => {
+  const date = normalizeDate(new Date());
+  const attendance = await Attendance.findOne({ employee: userId, date });
+
+  if (!attendance || !attendance.checkIn) {
+    throw new ApiError(400, 'Cannot resume without a check-in');
+  }
+  if (attendance.checkOut) {
+    throw new ApiError(400, 'Already checked out for today');
+  }
+  if (!attendance.isPaused) {
+    throw new ApiError(400, 'Attendance is not paused');
+  }
+
+  attendance.isPaused = false;
+  attendance.activeSince = new Date();
 
   await attendance.save();
   return formatAttendance(attendance);
@@ -237,6 +299,7 @@ export const updateAttendance = async (id, updates, updatedBy) => {
     checkIn: attendance.checkIn,
     checkOut: attendance.checkOut,
     isAutoCheckout: attendance.isAutoCheckout,
+    totalActiveMinutes: attendance.totalActiveMinutes,
   });
 
   attendance.status = result.status;

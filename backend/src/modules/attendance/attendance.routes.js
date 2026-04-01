@@ -8,6 +8,8 @@ import {
   getTodayAttendance,
   checkInToday,
   checkOutToday,
+  pauseAttendance,
+  resumeAttendance,
   updateAttendance,
   deleteAttendance,
 } from './attendance.controller.js';
@@ -24,6 +26,8 @@ router.use(protect);
 router.get('/today', getTodayAttendance);
 router.post('/checkin', checkInToday);
 router.post('/checkout', checkOutToday);
+router.post('/pause', pauseAttendance);
+router.post('/resume', resumeAttendance);
 router.post('/',  createAttendance);
 router.get('/',  listAttendances);
 router.get('/:id',  getAttendance);
